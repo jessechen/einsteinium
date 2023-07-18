@@ -16,13 +16,17 @@ function setup() {
     update();
 }
 
+function mouseMoved() {
+    // update();
+}
+
 function update() {
     background(240);
     drawGrid();
-    noFill();
 }
 
 function drawGrid() {
+    strokeWeight(1);
     stroke(color(0, 144, 0));
     let x = nextMultiple(-canvasHeight / root3, gridLength);
     while (x < canvasWidth + canvasHeight / root3) {
@@ -35,17 +39,19 @@ function drawGrid() {
         line(0, y, canvasWidth, y);
         y += gridLength * root3 / 2;
     }
-    drawShape()
+    const initialPoint = new Point(gridLength * 2, gridLength * root3);
+    drawShape(initialPoint);
+
+    // drawShape(alignToGrid(new Point(mouseX, mouseY)));
 }
 
 function move(p0, distance, angle) {
     return new Point(p0.x + distance * cos(angle), p0.y - distance * sin(angle));
 }
 
-function drawShape() {
+function drawShape(initialPoint) {
     stroke(color(0, 15, 85));
     strokeWeight(4);
-    const initialPoint = new Point(gridLength * 2, gridLength * root3);
     beginShape();
     vertex(initialPoint.x, initialPoint.y);
     const p1 = move(initialPoint, longSide, 0);
@@ -85,6 +91,10 @@ function nextMultiple(value, stepSize) {
     } else {
         return floor(value / stepSize) * stepSize;
     }
+}
+
+function alignToGrid(point) {
+    // Coordinates first
 }
 
 class Point {
