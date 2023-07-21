@@ -1,5 +1,6 @@
 const gridLength = 60;
 const root3 = Math.sqrt(3);
+const verticalGridLength = gridLength * root3 / 2;
 const longSide = gridLength / 2;
 const shortSide = gridLength / (2 * root3);
 let canvasWidth, canvasHeight;
@@ -17,7 +18,7 @@ function setup() {
 }
 
 function mouseMoved() {
-    // update();
+    update();
 }
 
 function update() {
@@ -37,12 +38,14 @@ function drawGrid() {
     let y = 0;
     while (y < canvasHeight) {
         line(0, y, canvasWidth, y);
-        y += gridLength * root3 / 2;
+        y += verticalGridLength;
     }
     const initialPoint = new Point(gridLength * 2, gridLength * root3);
     drawShape(initialPoint);
-
-    // drawShape(alignToGrid(new Point(mouseX, mouseY)));
+    strokeWeight(10);
+    const nearestVertex = new Point(mouseX, mouseY).toVertex().alignToGrid();
+    const coords = nearestVertex.toPoint();
+    point(coords.x, coords.y);
 }
 
 function move(p0, distance, angle) {
@@ -93,21 +96,32 @@ function nextMultiple(value, stepSize) {
     }
 }
 
-function alignToGrid(point) {
-    // Coordinates first
-}
-
 class Point {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 
-    minus(other) {
-        return new Point(this.x - other.x, this.y - other.y);
+    toVertex() {
+        const i = this.x - this.y / root3;
+        const j = this.y * 2 / root3;
+        return new Vertex(i / gridLength, j / gridLength);
+    }
+}
+
+class Vertex {
+    constructor(i, j) {
+        this.i = i;
+        this.j = j;
     }
 
-    distanceTo(other) {
-        return sqrt(sq(this.x - other.x) + sq(this.y - other.y));
+    toPoint() {
+        const x = this.i + this.j / 2;
+        const y = this.j * root3 / 2;
+        return new Point(gridLength * x, gridLength * y);
+    }
+
+    alignToGrid() {
+        return new Vertex(round(this.i), round(this.j));
     }
 }
