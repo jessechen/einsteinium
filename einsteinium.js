@@ -3,6 +3,7 @@ const root3 = Math.sqrt(3);
 const verticalGridLength = gridLength * root3 / 2;
 const longSide = gridLength / 2;
 const shortSide = gridLength / (2 * root3);
+const shapes = [];
 let canvasWidth, canvasHeight;
 
 function draw() {
@@ -14,6 +15,7 @@ function setup() {
     createCanvas(canvasWidth, canvasHeight);
     background(240);
     noLoop();
+    shapes.push(new Vertex(1, 1), new Vertex(1, 3), new Vertex(3, 1));
     update();
 }
 
@@ -21,9 +23,15 @@ function mouseMoved() {
     update();
 }
 
+function mouseClicked() {
+    shapes.push(new Point(mouseX, mouseY).toVertex().alignToGrid());
+    update();
+}
+
 function update() {
     background(240);
     drawGrid();
+    drawShapes();
 }
 
 function drawGrid() {
@@ -40,22 +48,29 @@ function drawGrid() {
         line(0, y, canvasWidth, y);
         y += verticalGridLength;
     }
-    const initialPoint = new Point(gridLength * 2, gridLength * root3);
-    drawShape(initialPoint);
-    strokeWeight(10);
+}
+
+function nextMultiple(value, stepSize) {
+    if (value > 0) {
+        return ceil(value / stepSize) * stepSize;
+    } else {
+        return floor(value / stepSize) * stepSize;
+    }
+}
+
+function drawShapes() {
+    for (let shape of shapes) {
+        drawShape(shape);
+    }
     const nearestVertex = new Point(mouseX, mouseY).toVertex().alignToGrid();
-    const coords = nearestVertex.toPoint();
-    point(coords.x, coords.y);
+    drawShape(nearestVertex);
 }
 
-function move(p0, distance, angle) {
-    return new Point(p0.x + distance * cos(angle), p0.y - distance * sin(angle));
-}
-
-function drawShape(initialPoint) {
+function drawShape(initialVertex) {
     stroke(color(0, 15, 85));
     strokeWeight(4);
     beginShape();
+    const initialPoint = initialVertex.toPoint();
     vertex(initialPoint.x, initialPoint.y);
     const p1 = move(initialPoint, longSide, 0);
     vertex(p1.x, p1.y);
@@ -88,12 +103,8 @@ function drawShape(initialPoint) {
     endShape();
 }
 
-function nextMultiple(value, stepSize) {
-    if (value > 0) {
-        return ceil(value / stepSize) * stepSize;
-    } else {
-        return floor(value / stepSize) * stepSize;
-    }
+function move(p0, distance, angle) {
+    return new Point(p0.x + distance * cos(angle), p0.y - distance * sin(angle));
 }
 
 class Point {
