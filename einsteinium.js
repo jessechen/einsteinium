@@ -15,7 +15,9 @@ function setup() {
     createCanvas(canvasWidth, canvasHeight);
     background(240);
     noLoop();
-    shapes.push(new Vertex(1, 1), new Vertex(1, 3), new Vertex(3, 1));
+    shapes.push(new Hat(new Vertex(1, 1), 0, false));
+    shapes.push(new Hat(new Vertex(1, 3), 1/12 * TAU, false));
+    shapes.push(new Hat(new Vertex(3, 1), 11/12 * TAU, false));
     update();
 }
 
@@ -24,7 +26,7 @@ function mouseMoved() {
 }
 
 function mouseClicked() {
-    shapes.push(new Point(mouseX, mouseY).toVertex().alignToGrid());
+    shapes.push(new Hat(new Point(mouseX, mouseY).toVertex().alignToGrid(), 0, false));
     update();
 }
 
@@ -60,47 +62,10 @@ function nextMultiple(value, stepSize) {
 
 function drawShapes() {
     for (let shape of shapes) {
-        drawShape(shape);
+        shape.draw();
     }
     const nearestVertex = new Point(mouseX, mouseY).toVertex().alignToGrid();
-    drawShape(nearestVertex);
-}
-
-function drawShape(initialVertex) {
-    stroke(color(0, 15, 85));
-    strokeWeight(4);
-    beginShape();
-    const initialPoint = initialVertex.toPoint();
-    vertex(initialPoint.x, initialPoint.y);
-    const p1 = move(initialPoint, longSide, 0);
-    vertex(p1.x, p1.y);
-    const p2 = move(p1, shortSide, 3 * TAU / 4);
-    vertex(p2.x, p2.y);
-    const p3 = move(p2, shortSide, 11 * TAU / 12);
-    vertex(p3.x, p3.y);
-    const p4 = move(p3, longSide, 2 * TAU / 3);
-    vertex(p4.x, p4.y);
-    const p5 = move(p4, longSide, TAU / 2);
-    vertex(p5.x, p5.y);
-    const p6 = move(p5, shortSide, 3 * TAU / 4);
-    vertex(p6.x, p6.y);
-    const p7 = move(p6, shortSide, 7 * TAU / 12);
-    vertex(p7.x, p7.y);
-    const p8 = move(p7, longSide, TAU / 3);
-    vertex(p8.x, p8.y);
-    const p9 = move(p8, longSide, TAU / 6);
-    vertex(p9.x, p9.y);
-    const p10 = move(p9, shortSide, 5 * TAU / 12);
-    vertex(p10.x, p10.y);
-    const p11 = move(p10, shortSide, TAU / 4);
-    vertex(p11.x, p11.y);
-    const p12 = move(p11, shortSide, TAU / 4);
-    vertex(p12.x, p12.y);
-    const p13 = move(p12, shortSide, TAU / 12);
-    vertex(p13.x, p13.y);
-    const p14 = move(p13, longSide, 5 * TAU / 6);
-    vertex(p14.x, p14.y);
-    endShape();
+    new Hat(nearestVertex, 0, false).draw();
 }
 
 function move(p0, distance, angle) {
@@ -134,5 +99,59 @@ class Vertex {
 
     alignToGrid() {
         return new Vertex(round(this.i), round(this.j));
+    }
+}
+
+class Vector {
+    constructor(magnitude, direction) {
+        this.magnitude = magnitude;
+        this.direction = direction;
+    }
+}
+
+class Hat {
+    constructor(origin, rotation, isFlipped) {
+        this.origin = origin;
+        this.rotation = rotation;
+        this.isFlipped = isFlipped;
+    }
+
+    sides() {
+        return [
+            new Vector(longSide, 0 * TAU),
+            new Vector(shortSide, 3/4 * TAU),
+            new Vector(shortSide, 11/12 * TAU),
+            new Vector(longSide, 2/3 * TAU),
+            new Vector(longSide, 1/2 * TAU),
+            new Vector(shortSide, 3/4 * TAU),
+            new Vector(shortSide, 7/12 * TAU),
+            new Vector(longSide, 1/3 * TAU),
+            new Vector(longSide, 1/6 * TAU),
+            new Vector(shortSide, 5/12 * TAU),
+            new Vector(shortSide, 1/4 * TAU),
+            new Vector(shortSide, 1/4 * TAU),
+            new Vector(shortSide, 1/12 * TAU),
+            new Vector(longSide, 5/6 * TAU),
+        ]
+    }
+    
+    points() {
+        let currentPoint = this.origin.toPoint();
+        const points = [currentPoint];
+        for (let side of this.sides()) {
+            currentPoint = move(currentPoint, side.magnitude, side.direction + this.rotation);
+            points.push(currentPoint);
+        }
+        return points;
+    }
+
+    draw() {
+        stroke(color(0, 15, 85));
+        strokeWeight(4);
+        beginShape();
+        for (let point of this.points()) {
+            vertex(point.x, point.y);
+        }
+        endShape();    
     }
 }
