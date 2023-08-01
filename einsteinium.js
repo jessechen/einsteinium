@@ -5,6 +5,7 @@ const longSide = gridLength / 2;
 const shortSide = gridLength / (2 * root3);
 const shapes = [];
 let canvasWidth, canvasHeight;
+let currentRotation = 0;
 
 function draw() {
 }
@@ -16,8 +17,8 @@ function setup() {
     background(240);
     noLoop();
     shapes.push(new Hat(new Vertex(1, 1), 0, false));
-    shapes.push(new Hat(new Vertex(1, 3), 1/12 * TAU, false));
-    shapes.push(new Hat(new Vertex(3, 1), 11/12 * TAU, false));
+    shapes.push(new Hat(new Vertex(1, 3), 1/6 * TAU, false));
+    shapes.push(new Hat(new Vertex(3, 1), 5/6 * TAU, false));
     update();
 }
 
@@ -26,8 +27,26 @@ function mouseMoved() {
 }
 
 function mouseClicked() {
-    shapes.push(new Hat(new Point(mouseX, mouseY).toVertex().alignToGrid(), 0, false));
+    shapes.push(new Hat(new Point(mouseX, mouseY).toVertex().alignToGrid(), currentRotation, false));
     update();
+}
+
+function keyTyped() {
+    if (key === 'q') {
+        // rotate left
+        currentRotation += 1/6 * TAU;
+        if (currentRotation > TAU) {
+            currentRotation = 1/6 * TAU;
+        }
+        update();
+    } else if (key === 'e') {
+        // rotate right
+        currentRotation -= 1/6 * TAU;
+        if (currentRotation < 0) {
+            currentRotation = 5/6 * TAU;
+        }
+        update();
+    }
 }
 
 function update() {
@@ -65,7 +84,7 @@ function drawShapes() {
         shape.draw();
     }
     const nearestVertex = new Point(mouseX, mouseY).toVertex().alignToGrid();
-    new Hat(nearestVertex, 0, false).draw();
+    new Hat(nearestVertex, currentRotation, false).draw();
 }
 
 function move(p0, distance, angle) {
@@ -117,22 +136,42 @@ class Hat {
     }
 
     sides() {
-        return [
-            new Vector(longSide, 0 * TAU),
-            new Vector(shortSide, 3/4 * TAU),
-            new Vector(shortSide, 11/12 * TAU),
-            new Vector(longSide, 2/3 * TAU),
-            new Vector(longSide, 1/2 * TAU),
-            new Vector(shortSide, 3/4 * TAU),
-            new Vector(shortSide, 7/12 * TAU),
-            new Vector(longSide, 1/3 * TAU),
-            new Vector(longSide, 1/6 * TAU),
-            new Vector(shortSide, 5/12 * TAU),
-            new Vector(shortSide, 1/4 * TAU),
-            new Vector(shortSide, 1/4 * TAU),
-            new Vector(shortSide, 1/12 * TAU),
-            new Vector(longSide, 5/6 * TAU),
-        ]
+        if (this.isFlipped) {
+            // TODO figure out how to mirror while staying on grid
+            return [
+                new Vector(longSide, 0 * TAU),
+                new Vector(shortSide, 3/4 * TAU),
+                new Vector(shortSide, 11/12 * TAU),
+                new Vector(longSide, 2/3 * TAU),
+                new Vector(longSide, 1/2 * TAU),
+                new Vector(shortSide, 3/4 * TAU),
+                new Vector(shortSide, 7/12 * TAU),
+                new Vector(longSide, 1/3 * TAU),
+                new Vector(longSide, 1/6 * TAU),
+                new Vector(shortSide, 5/12 * TAU),
+                new Vector(shortSide, 1/4 * TAU),
+                new Vector(shortSide, 1/4 * TAU),
+                new Vector(shortSide, 1/12 * TAU),
+                new Vector(longSide, 5/6 * TAU),
+            ];
+        } else {
+            return [
+                new Vector(longSide, 0 * TAU),
+                new Vector(shortSide, 3/4 * TAU),
+                new Vector(shortSide, 11/12 * TAU),
+                new Vector(longSide, 2/3 * TAU),
+                new Vector(longSide, 1/2 * TAU),
+                new Vector(shortSide, 3/4 * TAU),
+                new Vector(shortSide, 7/12 * TAU),
+                new Vector(longSide, 1/3 * TAU),
+                new Vector(longSide, 1/6 * TAU),
+                new Vector(shortSide, 5/12 * TAU),
+                new Vector(shortSide, 1/4 * TAU),
+                new Vector(shortSide, 1/4 * TAU),
+                new Vector(shortSide, 1/12 * TAU),
+                new Vector(longSide, 5/6 * TAU),
+            ]
+        }
     }
     
     points() {
